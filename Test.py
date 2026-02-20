@@ -1,4 +1,4 @@
-from social_networks.tg.publish import publish_post
+from social_networks.publish import publish_post
 from utils.tipograph import format_text
 
 result = publish_post(
