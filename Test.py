@@ -1,4 +1,5 @@
 from social_networks.publish import publish_post
+from social_networks.delete import delete_post
 from utils.tipograph import format_text
 
 result = publish_post(
@@ -12,3 +13,7 @@ result = publish_post(
 )
 
 print(result)
+
+
+delete = delete_post(4, True)
+print(delete)

@@ -40,3 +40,16 @@ def tg_send_animation(chat_id, animation: str, caption: str | None = None):
         )
     except TelegramError as e:
         raise e
+
+
+def tg_delete_message(chat_id, message_id: int):
+    """
+    Удаляет сообщение по message_id
+    """
+    try:
+        return bot.delete_message(
+            chat_id=chat_id,
+            message_id=message_id
+        )
+    except TelegramError:
+        raise

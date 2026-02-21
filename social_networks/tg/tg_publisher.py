@@ -1,5 +1,10 @@
 from telegram.error import TelegramError
-from .tg_client import tg_send_message, tg_send_photo, tg_send_animation
+from .tg_client import (
+    tg_send_message,
+    tg_send_photo,
+    tg_send_animation,
+    tg_delete_message
+)
 from config import TG_CHAT_ID
 
 
@@ -43,6 +48,29 @@ def publish_to_telegram(
         return {
             "success": True,
             "message_id": message.message_id
+        }
+
+    except TelegramError as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+def delete_from_telegram(message_id: int):
+    """
+    Удаление поста в Telegram по ID
+    """
+
+    try:
+        tg_delete_message(
+            chat_id=TG_CHAT_ID,
+            message_id=message_id
+        )
+
+        return {
+            "success": True,
+            "deleted_message_id": message_id
         }
 
     except TelegramError as e:
