@@ -17,9 +17,11 @@ def process_posts():
             # 🔹 Дебаг: что реально пришло из Google Sheets
             print(f"🔹 Пост {idx}: publish_at='{post.get('publish_at')}', delete_at='{post.get('delete_at')}', status='{post.get('status')}', tg='{post.get('tg')}'")
 
+            status = post.get("status", "").strip()
+
             # --- Публикация ---
             publish_at_str = post.get("publish_at", "").strip()
-            if post.get("tg") == "TRUE" and not post.get("status") and publish_at_str:
+            if post.get("tg") == "TRUE" and not status and publish_at_str:
                 if is_time_to_publish(publish_at_str):
                     sheets.update_status(idx, "processing")
 
@@ -41,7 +43,7 @@ def process_posts():
 
             # --- Удаление ---
             delete_at_str = post.get("delete_at", "").strip()
-            if delete_at_str:
+            if delete_at_str and status != "Удален":  # 🔹 проверка, что пост ещё не удалён
                 delete_time = None
                 for fmt in ("%d.%m.%Y %H:%M:%S", "%d.%m.%Y %H:%M"):
                     try:
