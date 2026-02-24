@@ -14,13 +14,17 @@ def process_posts():
 
     for idx, post in enumerate(posts, start=2):  # start=2 учитывает заголовки
         try:
+            # 🔹 Дебаг: что реально пришло из Google Sheets
+            print(f"🔹 Пост {idx}: publish_at='{post.get('publish_at')}', delete_at='{post.get('delete_at')}', status='{post.get('status')}', tg='{post.get('tg')}'")
+
             # --- Публикация ---
-            if post.get("tg") == "TRUE" and not post.get("status"):
-                if is_time_to_publish(post["publish_at"]):
+            publish_at_str = post.get("publish_at", "").strip()
+            if post.get("tg") == "TRUE" and not post.get("status") and publish_at_str:
+                if is_time_to_publish(publish_at_str):
                     sheets.update_status(idx, "processing")
 
                     result = publish_post(
-                        format_text(post["text"]),
+                        format_text(post.get("text", "")),
                         media_url=post.get("media_url"),
                         telegram=True,
                         vk=post.get("vk") == "TRUE",
@@ -28,27 +32,25 @@ def process_posts():
                     )
 
                     # Сохраняем message_id в колонку I
-                    if result['telegram']['success']:
-                        sheets.update_cell(
-                            idx, 'I', result['telegram']['message_id'])
+                    message_id = result.get('telegram', {}).get('message_id')
+                    if message_id:
+                        sheets.update_cell(idx, 'I', message_id)
 
                     sheets.update_status(idx, "Опубликовано")
-                    print(f"✅ Опубликовано: {post['text']} | {result}")
+                    print(f"✅ Опубликовано: {post.get('text')} | {result}")
 
             # --- Удаление ---
-            delete_at = post.get("delete_at")
-            if delete_at:
+            delete_at_str = post.get("delete_at", "").strip()
+            if delete_at_str:
+                delete_time = None
                 for fmt in ("%d.%m.%Y %H:%M:%S", "%d.%m.%Y %H:%M"):
                     try:
-                        delete_time = datetime.strptime(delete_at, fmt)
+                        delete_time = datetime.strptime(delete_at_str, fmt)
                         break
                     except ValueError:
                         continue
-                else:
-                    raise ValueError(
-                        f"Невозможно распарсить дату удаления: {delete_at}")
 
-                if datetime.now() >= delete_time:
+                if delete_time and datetime.now() >= delete_time:
                     # Используем message_id для точного удаления
                     message_id = post.get("telegram_message_id")
                     if message_id:
