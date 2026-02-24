@@ -22,12 +22,13 @@ pip install -r requirements.txt
 
 - Google Sheets API
 - Google Docs API
+- Google Drive API
 
 3. Создайте сервисный аккаунт:
 
 - Перейдите в «IAM и администрирование» → «Сервисные аккаунты».
 - Создайте новый аккаунт, скачайте JSON-ключ.
-- Сохраните ключ в корне проекта, например creds.json (добавьте его в .gitignore!).
+- Сохраните ключ в корне проекта, например credentials.json (добавьте его в .gitignore!).
 
 4. Дайте доступ сервисному аккаунту:
 
@@ -37,37 +38,20 @@ pip install -r requirements.txt
 
 ## 3. Подключение и использование в коде
 
-```python
-from google_client import GoogleClient
+Необходимы 2 переменных окружения .env
 
-# Создаём клиент (авторизация происходит автоматически)
-client = GoogleClient('creds.json')
+TELEGRAM_BOT_TOKEN = 
+TELEGRAM_CHAT_ID = 
 
-# ID таблицы можно взять из её URL: https://docs.google.com/spreadsheets/d/1abc.../edit
-SHEET_ID = 'ваш_id_таблицы'
+## 4. Запуск
 
-# Чтение данных (например, колонки A-H на листе "Лист1")
-rows = client.read_sheet(SHEET_ID, 'Лист1!A:H')
-# rows[0] – заголовки, rows[1:] – данные
-
-# Получение текста из документа по ссылке
-doc_url = 'https://docs.google.com/document/d/...'
-try:
-    text = client.get_text_from_doc(doc_url)
-except Exception as e:
-    print('Ошибка получения текста:', e)
-
-# Скачивание медиа по прямой ссылке
-media_url = 'https://example.com/image.jpg'
-file_path = client.download_media(media_url)
-if file_path:
-    print('Медиа сохранено в', file_path)
-
-# Обновление статуса в ячейке H2
-client.update_cell(SHEET_ID, row=2, col='H', value='Опубликовано')
+```bash
+python main_scheduler.py
 ```
+![Demo](<Снимок экрана 2026-02-24 в 23.33.51.png>)
 
-## 4. Важные замечания
+
+## 5. Важные замечания
 
 1. Не коммитьте JSON-ключ! Он должен быть в .gitignore. Используйте переменные окружения или передавайте путь через конфиг.
 2. Доступ к документам: сервисному аккаунту нужно явно открыть доступ к каждому документу (роль «Читатель»), иначе get_text_from_doc вернёт ошибку 403.
